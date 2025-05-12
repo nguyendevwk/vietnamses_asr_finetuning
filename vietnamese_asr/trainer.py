@@ -235,7 +235,7 @@ class VietnameseASRTrainer:
             per_device_train_batch_size=self.config.training.per_device_train_batch_size,
             per_device_eval_batch_size=self.config.training.per_device_eval_batch_size,
             gradient_accumulation_steps=self.config.training.gradient_accumulation_steps,
-            evaluation_strategy=self.config.evaluation.eval_strategy,
+            eval_strategy=self.config.evaluation.eval_strategy,
             num_train_epochs=self.config.training.num_train_epochs,
             max_steps=self.config.training.max_steps,
             gradient_checkpointing=self.config.training.gradient_checkpointing,
@@ -266,7 +266,7 @@ class VietnameseASRTrainer:
             max_grad_norm=self.config.optimizer.max_grad_norm,
             optim=self.config.optimizer.name,
             # Learning rate scheduler params
-            # lr_scheduler_type=self.config.lr_scheduler.name,
+            # lr_scheduler_type=self.config.lr_scheduler.nam    e,
             # num_cycles=self.config.lr_scheduler.num_cycles,
             # power=self.config.lr_scheduler.power,
         )
