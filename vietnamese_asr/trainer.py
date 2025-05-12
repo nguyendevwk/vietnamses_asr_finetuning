@@ -337,7 +337,9 @@ class VietnameseASRTrainer:
             processor=self.processor,
             eval_dataset=self.eval_dataset
         )
-        self.callbacks.append(wer_callback)
+        # self.callbacks.append(wer_callback)
+        if hasattr(self, '_callbacks_added') and self._callbacks_added:
+            return
 
         # Callback để lưu mô hình tốt nhất
         save_best_model_callback = SaveBestModelCallback(
