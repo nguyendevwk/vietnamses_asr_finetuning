@@ -1,0 +1,89 @@
+# Cấu hình mặc định cho fine-tuning ASR tiếng Việt
+
+# Thông tin dữ liệu
+data:
+    data_dir: "./data" # Thư mục chứa audio
+    metadata_file: "./data/metadata.csv" # File CSV chứa thông tin audio và transcription
+    audio_column: "audio_path" # Tên cột chứa đường dẫn audio
+    text_column: "transcription" # Tên cột chứa văn bản
+    val_split: 0.1 # Tỷ lệ validation
+    max_train_samples: null # Giới hạn số mẫu training (null = không giới hạn)
+    max_val_samples: null # Giới hạn số mẫu validation (null = không giới hạn)
+    sample_rate: 16000 # Tần số lấy mẫu (Hz)
+
+# Cấu hình DataLoader
+dataloader:
+    num_workers: 4 # Số worker cho DataLoader
+    pin_memory: true # Sử dụng pin_memory để tăng tốc truyền dữ liệu
+    prefetch_factor: 2 # Hệ số prefetch cho DataLoader
+    persistent_workers: true # Giữ worker tồn tại giữa các epoch
+
+# Thông tin mô hình
+model:
+    base_model: "nguyenvulebinh/wav2vec2-base-vietnamese-250h" # Mô hình cơ sở
+    freeze_feature_encoder: true # Đóng băng feature encoder
+    freeze_base_model: false # Đóng băng toàn bộ base model
+    attention_dropout: 0.0 # Tỷ lệ dropout cho attention
+    hidden_dropout: 0.0 # Tỷ lệ dropout cho hidden layers
+    feat_proj_dropout: 0.0 # Tỷ lệ dropout cho feature projection
+    mask_time_prob: 0.05 # Xác suất masking thời gian
+    layerdrop: 0.0 # Tỷ lệ bỏ qua layer
+
+# Cấu hình huấn luyện
+training:
+    output_dir: "./vietnamese-asr-finetuned" # Thư mục lưu mô hình
+    seed: 42 # Hạt giống ngẫu nhiên
+    per_device_train_batch_size: 16 # Kích thước batch cho training
+    per_device_eval_batch_size: 8 # Kích thước batch cho validation
+    gradient_accumulation_steps: 2 # Số bước tích lũy gradient
+    num_train_epochs: 30 # Số epoch huấn luyện
+    learning_rate: 3e-4 # Tốc độ học
+    warmup_steps: 500 # Số bước khởi động
+    max_steps: -1 # Số bước tối đa (-1 = dùng num_train_epochs)
+    gradient_checkpointing: true # Sử dụng gradient checkpointing để tiết kiệm bộ nhớ
+    group_by_length: true # Nhóm các mẫu có độ dài tương tự
+
+# Cấu hình đánh giá
+evaluation:
+    eval_strategy: "steps" # Chiến lược đánh giá ("steps", "epoch")
+    eval_steps: 400 # Số bước giữa mỗi lần đánh giá
+    logging_steps: 100 # Số bước giữa mỗi lần ghi log
+    save_steps: 400 # Số bước giữa mỗi lần lưu mô hình
+    save_total_limit: 2 # Số checkpoint tối đa được lưu
+    metric_for_best_model: "wer" # Metric để chọn model tốt nhất
+    greater_is_better: false # WER càng thấp càng tốt
+    load_best_model_at_end: true # Tải model tốt nhất khi kết thúc training
+
+# Cấu hình tối ưu hóa
+optimizer:
+    name: "adamw_torch" # Tên optimizer (adamw_torch, adamw_hf, adafactor, etc.)
+    weight_decay: 0.0 # Weight decay
+    adam_beta1: 0.9 # Beta 1 cho Adam
+    adam_beta2: 0.999 # Beta 2 cho Adam
+    adam_epsilon: 1e-8 # Epsilon cho Adam
+    max_grad_norm: 1.0 # Gradient clipping
+
+# Cấu hình learning rate scheduler
+lr_scheduler:
+    name: "linear" # Tên scheduler (linear, cosine, cosine_with_restarts, polynomial)
+    num_cycles: 1 # Số chu kỳ (dùng cho cosine_with_restarts)
+    power: 1.0 # Lũy thừa (dùng cho polynomial)
+
+# Cấu hình phân tán và tài nguyên
+distributed:
+    fp16: true # Sử dụng mixed precision training
+    bf16: false # Sử dụng bfloat16 (nếu có)
+    fp16_opt_level: "O1" # Mức tối ưu hóa fp16 (O1, O2, O3)
+    local_rank: -1 # Local rank cho distributed training
+    n_gpu: 1 # Số GPU sử dụng
+    ddp_backend: "nccl" # Backend cho DDP (nccl, gloo)
+
+# Cấu hình báo cáo và theo dõi
+reporting:
+    report_to: ["tensorboard"] # Các platform để báo cáo (tensorboard, wandb)
+    run_name: null # Tên cho run logging (null = tự động)
+
+# Cấu hình mô tả dự án
+project:
+    name: "vietnamese-asr" # Tên dự án
+    tags: ["speech-recognition", "vietnamese", "wav2vec2"] # Các tag

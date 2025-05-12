@@ -1,0 +1,40 @@
+# Cấu hình cho huấn luyện đa GPU
+# Kế thừa cấu hình mặc định và ghi đè một số tham số
+
+defaults:
+  - default_config
+
+# Các thay đổi cho đa GPU
+dataloader:
+  num_workers: 8                                              # Tăng số worker cho đa GPU
+  pin_memory: true
+  prefetch_factor: 4                                          # Tăng prefetch factor
+
+training:
+  per_device_train_batch_size: 8                              # Giảm kích thước batch mỗi GPU
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 1                              # Giảm gradient accumulation vì đã có nhiều GPU
+
+distributed:
+  fp16: true
+  local_rank: -1                                              # Sẽ được thiết lập bởi torchrun
+  n_gpu: -1                                                   # -1 = sử dụng tất cả GPU có sẵn
+  ddp_backend: "nccl"                                         # nccl cho GPU, gloo cho CPU
+  ddp_find_unused_parameters: false                           # Tối ưu hóa hiệu suất
+  ddp_bucket_cap_mb: 25                                       # Kích thước bucket cho gradients
+
+# Cấu hình đánh giá phân tán
+evaluation:
+  eval_strategy: "steps"
+  eval_steps: 400
+  save_steps: 400
+  dataloader_num_workers: 4                                   # Số worker cho dataloader evaluation
+  
+# Các tham số khác cho đa GPU
+optimizer:
+  name: "adamw_apex_fused"                                    # Sử dụng fused adam nếu có Apex
+  
+# Rõ ràng là sử dụng wandb để theo dõi đa GPU
+reporting:
+  report_to: ["tensorboard", "wandb"]
+  run_name: "multi-gpu-vietnamese-asr"
