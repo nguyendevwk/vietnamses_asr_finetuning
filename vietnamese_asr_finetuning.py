@@ -483,16 +483,3 @@ if __name__ == "__main__":
     main()
 
 
-    config.json
-
-preprocessor_config.json
-
-pytorch_model.bin
-
-special_tokens_map.json
-
-tokenizer_config.json
-
-vi_lm_4grams.bin.zip
-
-vocab.json

@@ -266,9 +266,9 @@ class VietnameseASRTrainer:
             max_grad_norm=self.config.optimizer.max_grad_norm,
             optim=self.config.optimizer.name,
             # Learning rate scheduler params
-            lr_scheduler_type=self.config.lr_scheduler.name,
-            num_cycles=self.config.lr_scheduler.num_cycles,
-            power=self.config.lr_scheduler.power,
+            # lr_scheduler_type=self.config.lr_scheduler.name,
+            # num_cycles=self.config.lr_scheduler.num_cycles,
+            # power=self.config.lr_scheduler.power,
         )
 
         # Thiết lập tên cho run
