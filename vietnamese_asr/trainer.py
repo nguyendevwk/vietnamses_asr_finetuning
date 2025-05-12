@@ -18,10 +18,18 @@ from transformers import (
     TrainerControl
 )
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
+# Replace all evaluate.load("wer") instances with direct jiwer usage:
+import jiwer
+
+# In WerCallback.__init__
+def compute_wer(predictions, references):
+    return jiwer.wer(references, predictions)
+
+# Then use this function instead of evaluate.load("wer")
 
 from datasets import Dataset
 import evaluate
-from evaluate import load as evaluate_load
+
 
 class WerCallback(TrainerCallback):
     """
@@ -41,7 +49,11 @@ class WerCallback(TrainerCallback):
         self.eval_dataset = eval_dataset
         self.test_samples = min(test_samples, len(eval_dataset))
         # self.wer_metric = evaluate.load("wer")
-        self.wer_metric = evaluate_load("wer")
+        # self.wer_metric = evaluate_load("wer")
+        self.wer_metric = {
+            "compute": lambda predictions=None, references=None:
+                compute_wer(predictions=predictions, references=references)
+        }
 
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
         """
