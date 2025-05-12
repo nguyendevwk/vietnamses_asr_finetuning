@@ -15,7 +15,7 @@ from omegaconf import DictConfig, OmegaConf
 # Thêm thư mục gốc vào đường dẫn
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from vietnamese_asr.config import parse_args_with_config, update_config_for_distributed, print_config_summary, save_config_to_json
+from vietnamese_asr.config import parse_args_with_config, update_config_for_distributed, print_config_summary
 from vietnamese_asr.data import VietnameseASRDataModule
 from vietnamese_asr.model import VietnameseASRModelHandler
 from vietnamese_asr.trainer import VietnameseASRTrainer
@@ -34,7 +34,9 @@ def main():
     os.makedirs(config.training.output_dir, exist_ok=True)
 
     # Lưu config
-    save_config_to_json(config, os.path.join(config.training.output_dir, "config.json"))
+    config_file = os.path.join(config.training.output_dir, "config.yaml")
+    with open(config_file, "w") as f:
+        f.write(OmegaConf.to_yaml(config))
 
     # Thiết lập logging
     logger = setup_logging(config.training.output_dir)

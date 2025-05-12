@@ -8,15 +8,15 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 setup(
     name="vietnamese-asr-finetuning",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="phamnguyen.devwk",
+    author_email="phamnguyen.devwk@gmail.com",
     description="A toolkit for fine-tuning Wav2Vec2 for Vietnamese automatic speech recognition (ASR)",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/vietnamese-asr-finetuning",
+    url="https://github.com/nguyendevwk/vietnamses_asr_finetuning.git",
     project_urls={
-        "Source": "https://github.com/yourusername/vietnamese-asr-finetuning",
-        "Bug Tracker": "https://github.com/yourusername/vietnamese-asr-finetuning/issues",
+        "Source": "https://github.com/nguyendevwk/vietnamses_asr_finetuning.git",
+        "Bug Tracker": "https://github.com/nguyendevwk/vietnamses_asr_finetuning.git/issues",
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
