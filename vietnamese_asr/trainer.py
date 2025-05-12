@@ -353,7 +353,7 @@ class VietnameseASRTrainer:
         )
         self.callbacks.append(early_stopping_callback)
 
-    def create_trainer(self) -> Trainer:
+    # def create_trainer(self) -> Trainer:
         """
         Tạo và trả về Trainer.
 
@@ -381,7 +381,43 @@ class VietnameseASRTrainer:
         self.trainer.processor = self.processor
 
         return self.trainer
+    def create_trainer(self) -> Trainer:
+        """
+        Tạo và trả về Trainer.
 
+        Returns:
+            Trainer: Trainer đã khởi tạo.
+        """
+        if self.training_args is None:
+            self.create_training_args()
+
+        # Thêm các callback
+        self.add_callbacks()
+
+        # Kiểm tra và xử lý gradient checkpointing cho DataParallel
+        if isinstance(self.model, torch.nn.DataParallel) and self.config.training.gradient_checkpointing:
+            # Disable gradient checkpointing in training arguments to avoid the error
+            self.training_args.gradient_checkpointing = False
+            # Instead, manually enable it on the module inside DataParallel if possible
+            if hasattr(self.model.module, "gradient_checkpointing_enable"):
+                self.model.module.gradient_checkpointing_enable()
+                print("Đã bật gradient checkpointing trên model.module thay vì qua Trainer")
+
+        self.trainer = Trainer(
+            model=self.model,
+            data_collator=self.data_collator,
+            args=self.training_args,
+            compute_metrics=self.compute_metrics,
+            train_dataset=self.train_dataset,
+            eval_dataset=self.eval_dataset,
+            tokenizer=self.processor,
+            callbacks=self.callbacks
+        )
+
+        # Thêm processor vào trainer instance để có thể sử dụng trong callbacks
+        self.trainer.processor = self.processor
+
+        return self.trainer
     def train(self) -> Tuple[Dict[str, float], str]:
         """
         Huấn luyện mô hình.
