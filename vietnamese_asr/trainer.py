@@ -21,7 +21,7 @@ from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 
 from datasets import Dataset
 import evaluate
-
+from evaluate import load as evaluate_load
 
 class WerCallback(TrainerCallback):
     """
@@ -40,7 +40,8 @@ class WerCallback(TrainerCallback):
         self.processor = processor
         self.eval_dataset = eval_dataset
         self.test_samples = min(test_samples, len(eval_dataset))
-        self.wer_metric = evaluate.load("wer")
+        # self.wer_metric = evaluate.load("wer")
+        self.wer_metric = evaluate_load("wer")
 
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
         """
