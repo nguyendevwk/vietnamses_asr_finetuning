@@ -18,14 +18,6 @@ from transformers import (
     TrainerControl
 )
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
-# Replace all evaluate.load("wer") instances with direct jiwer usage:
-import jiwer
-
-# In WerCallback.__init__
-def compute_wer(predictions, references):
-    return jiwer.wer(references, predictions)
-
-# Then use this function instead of evaluate.load("wer")
 
 from datasets import Dataset
 import evaluate
@@ -48,12 +40,7 @@ class WerCallback(TrainerCallback):
         self.processor = processor
         self.eval_dataset = eval_dataset
         self.test_samples = min(test_samples, len(eval_dataset))
-        # self.wer_metric = evaluate.load("wer")
-        # self.wer_metric = evaluate_load("wer")
-        self.wer_metric = {
-            "compute": lambda predictions=None, references=None:
-                compute_wer(predictions=predictions, references=references)
-        }
+        self.wer_metric = evaluate.load("wer")
 
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
         """
@@ -279,9 +266,9 @@ class VietnameseASRTrainer:
             max_grad_norm=self.config.optimizer.max_grad_norm,
             optim=self.config.optimizer.name,
             # Learning rate scheduler params
-            # lr_scheduler_type=self.config.lr_scheduler.name,
-            # num_cycles=self.config.lr_scheduler.num_cycles,
-            # power=self.config.lr_scheduler.power,
+            lr_scheduler_type=self.config.lr_scheduler.name,
+            num_cycles=self.config.lr_scheduler.num_cycles,
+            power=self.config.lr_scheduler.power,
         )
 
         # Thiết lập tên cho run
