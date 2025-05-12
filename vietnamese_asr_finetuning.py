@@ -481,3 +481,18 @@ if __name__ == "__main__":
         subprocess.check_call(["pip", "install", "-q", "transformers", "datasets", "evaluate", "jiwer", "fsspec==2023.6.0"])
 
     main()
+
+
+    config.json
+
+preprocessor_config.json
+
+pytorch_model.bin
+
+special_tokens_map.json
+
+tokenizer_config.json
+
+vi_lm_4grams.bin.zip
+
+vocab.json

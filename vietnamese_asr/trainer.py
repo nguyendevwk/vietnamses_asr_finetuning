@@ -291,43 +291,31 @@ class VietnameseASRTrainer:
         self.training_args = training_args
         return training_args
 
-    # def compute_metrics(self, pred):
-    #     """
-    #     Tính toán metric Word Error Rate.
-
-    #     Args:
-    #         pred: Dự đoán từ mô hình.
-
-    #     Returns:
-    #         Dict: Dictionary chứa metric WER.
-    #     """
-    #     wer_metric = evaluate.load("wer")
-
-    #     pred_logits = pred.predictions
-    #     pred_ids = np.argmax(pred_logits, axis=-1)
-
-    #     # Thay thế -100 với pad token ID
-    #     pred.label_ids[pred.label_ids == -100] = self.processor.tokenizer.pad_token_id
-
-    #     # Giải mã dự đoán và nhãn
-    #     pred_str = self.processor.batch_decode(pred_ids)
-    #     label_str = self.processor.batch_decode(pred.label_ids, group_tokens=False)
-
-    #     # Tính WER
-    #     wer = wer_metric.compute(predictions=pred_str, references=label_str)
-
-    #     return {"wer": wer}
-    # Thay compute_metrics bằng:
     def compute_metrics(self, pred):
+        """
+        Tính toán metric Word Error Rate.
+
+        Args:
+            pred: Dự đoán từ mô hình.
+
+        Returns:
+            Dict: Dictionary chứa metric WER.
+        """
+        wer_metric = evaluate.load("wer")
+
         pred_logits = pred.predictions
         pred_ids = np.argmax(pred_logits, axis=-1)
 
+        # Thay thế -100 với pad token ID
         pred.label_ids[pred.label_ids == -100] = self.processor.tokenizer.pad_token_id
 
+        # Giải mã dự đoán và nhãn
         pred_str = self.processor.batch_decode(pred_ids)
         label_str = self.processor.batch_decode(pred.label_ids, group_tokens=False)
 
-        wer = jiwer.wer(label_str, pred_str)
+        # Tính WER
+        wer = wer_metric.compute(predictions=pred_str, references=label_str)
+
         return {"wer": wer}
 
     def add_callbacks(self):
@@ -337,9 +325,7 @@ class VietnameseASRTrainer:
             processor=self.processor,
             eval_dataset=self.eval_dataset
         )
-        # self.callbacks.append(wer_callback)
-        if hasattr(self, '_callbacks_added') and self._callbacks_added:
-            return
+        self.callbacks.append(wer_callback)
 
         # Callback để lưu mô hình tốt nhất
         save_best_model_callback = SaveBestModelCallback(
@@ -355,34 +341,6 @@ class VietnameseASRTrainer:
         )
         self.callbacks.append(early_stopping_callback)
 
-    # def create_trainer(self) -> Trainer:
-        """
-        Tạo và trả về Trainer.
-
-        Returns:
-            Trainer: Trainer đã khởi tạo.
-        """
-        if self.training_args is None:
-            self.create_training_args()
-
-        # Thêm các callback
-        self.add_callbacks()
-
-        self.trainer = Trainer(
-            model=self.model,
-            data_collator=self.data_collator,
-            args=self.training_args,
-            compute_metrics=self.compute_metrics,
-            train_dataset=self.train_dataset,
-            eval_dataset=self.eval_dataset,
-            tokenizer=self.processor,
-            callbacks=self.callbacks
-        )
-
-        # Thêm processor vào trainer instance để có thể sử dụng trong callbacks
-        self.trainer.processor = self.processor
-
-        return self.trainer
     def create_trainer(self) -> Trainer:
         """
         Tạo và trả về Trainer.
@@ -396,15 +354,6 @@ class VietnameseASRTrainer:
         # Thêm các callback
         self.add_callbacks()
 
-        # Kiểm tra và xử lý gradient checkpointing cho DataParallel
-        if isinstance(self.model, torch.nn.DataParallel) and self.config.training.gradient_checkpointing:
-            # Disable gradient checkpointing in training arguments to avoid the error
-            self.training_args.gradient_checkpointing = False
-            # Instead, manually enable it on the module inside DataParallel if possible
-            if hasattr(self.model.module, "gradient_checkpointing_enable"):
-                self.model.module.gradient_checkpointing_enable()
-                print("Đã bật gradient checkpointing trên model.module thay vì qua Trainer")
-
         self.trainer = Trainer(
             model=self.model,
             data_collator=self.data_collator,
@@ -420,6 +369,7 @@ class VietnameseASRTrainer:
         self.trainer.processor = self.processor
 
         return self.trainer
+
     def train(self) -> Tuple[Dict[str, float], str]:
         """
         Huấn luyện mô hình.
