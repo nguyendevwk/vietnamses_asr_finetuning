@@ -291,31 +291,43 @@ class VietnameseASRTrainer:
         self.training_args = training_args
         return training_args
 
+    # def compute_metrics(self, pred):
+    #     """
+    #     Tính toán metric Word Error Rate.
+
+    #     Args:
+    #         pred: Dự đoán từ mô hình.
+
+    #     Returns:
+    #         Dict: Dictionary chứa metric WER.
+    #     """
+    #     wer_metric = evaluate.load("wer")
+
+    #     pred_logits = pred.predictions
+    #     pred_ids = np.argmax(pred_logits, axis=-1)
+
+    #     # Thay thế -100 với pad token ID
+    #     pred.label_ids[pred.label_ids == -100] = self.processor.tokenizer.pad_token_id
+
+    #     # Giải mã dự đoán và nhãn
+    #     pred_str = self.processor.batch_decode(pred_ids)
+    #     label_str = self.processor.batch_decode(pred.label_ids, group_tokens=False)
+
+    #     # Tính WER
+    #     wer = wer_metric.compute(predictions=pred_str, references=label_str)
+
+    #     return {"wer": wer}
+    # Thay compute_metrics bằng:
     def compute_metrics(self, pred):
-        """
-        Tính toán metric Word Error Rate.
-
-        Args:
-            pred: Dự đoán từ mô hình.
-
-        Returns:
-            Dict: Dictionary chứa metric WER.
-        """
-        wer_metric = evaluate.load("wer")
-
         pred_logits = pred.predictions
         pred_ids = np.argmax(pred_logits, axis=-1)
 
-        # Thay thế -100 với pad token ID
         pred.label_ids[pred.label_ids == -100] = self.processor.tokenizer.pad_token_id
 
-        # Giải mã dự đoán và nhãn
         pred_str = self.processor.batch_decode(pred_ids)
         label_str = self.processor.batch_decode(pred.label_ids, group_tokens=False)
 
-        # Tính WER
-        wer = wer_metric.compute(predictions=pred_str, references=label_str)
-
+        wer = jiwer.wer(label_str, pred_str)
         return {"wer": wer}
 
     def add_callbacks(self):
